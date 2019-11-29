@@ -157,11 +157,17 @@ func (m *mirror) filterTags() {
 // return the name of repostiory, as it should be on the target
 // this include any target repository prefix + the repository name in DockerHub
 func (m *mirror) targetRepositoryName() string {
-	if m.repo.TargetPrefix != nil {
-		return fmt.Sprintf("%s%s", *m.repo.TargetPrefix, m.repo.Name)
+	newTargetName := m.repo.Name
+	if strings.Contains(m.repo.Name, ".") {
+		chunk := strings.SplitN(m.repo.Name, "/", 2)
+		newTargetName = chunk[1]
 	}
 
-	return fmt.Sprintf("%s%s", config.Target.Prefix, m.repo.Name)
+	if m.repo.TargetPrefix != nil {
+		return fmt.Sprintf("%s%s", *m.repo.TargetPrefix, newTargetName)
+	}
+
+	return fmt.Sprintf("%s%s", config.Target.Prefix, newTargetName)
 }
 
 // pull the image from remote repository to local docker agent
